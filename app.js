@@ -2,12 +2,17 @@ const express = require("express");
 const morgan = require("morgan");
 const { environment } = require('./config');
 const app = express();
+const { router: indexRouter, tweets: tweetsRouter } = require('./routes');
+
+const cors = require('cors');
 
 app.use(morgan("dev"));
+app.use(express.json());
+app.use(cors({ origin: "http://localhost:4000" }));
 
-app.get("/", (req, res) => {
-  res.send("Welcome to the express-sequelize-starter!");
-});
+app.use('/', indexRouter);
+app.use('/tweets', tweetsRouter);
+
 
 // Catch unhandled requests and forward to error handler.
 app.use((req, res, next) => {
@@ -16,7 +21,22 @@ app.use((req, res, next) => {
   next(err);
 });
 
-// Custom error handlers.
+// // Custom error handlers.
+// const handleValidationErrors = (req, res, next) => {
+//   const validationErrors = validationResult(req);
+//   // TODO: Generate error object and invoke next middleware function
+//   if (!validationErrors.isEmpty()) {
+//     const errors = validationErrors.array().map((error) => error.msg);
+
+//     const err = Error("Bad request.");
+//     err.errors = errors;
+//     err.status = 400;
+//     err.title = "Bad request.";
+//     return next(err);
+//   }
+//   next();
+// };
+
 
 // Generic error handler.
 app.use((err, req, res, next) => {
@@ -25,6 +45,7 @@ app.use((err, req, res, next) => {
   res.json({
     title: err.title || "Server Error",
     message: err.message,
+    errors: err.errors,
     stack: isProduction ? null : err.stack,
   });
 });
