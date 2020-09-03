@@ -11,4 +11,5 @@ router.get("/", (req, res) => {
 module.exports = {
   tweets: require('./tweets'),
   router,
+  users: require('./users')
 }

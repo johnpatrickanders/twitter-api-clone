@@ -5,9 +5,8 @@ const router = express.Router();
 const { check, validationResult } = require('express-validator')
 
 const db = require('../db/models');
+const { asyncHandler, handleValidationErrors } = require('../../utils');
 const { Tweet } = db;
-
-const asyncHandler = handler => (req, res, next) => handler(req, res, next).catch(next);
 
 const messageValidator = [
   check('message')
@@ -17,22 +16,6 @@ const messageValidator = [
     .isLength({ max: 280 })
     .withMessage('No more than 280 characters.')
 ]
-
-// Custom error handlers.
-const handleValidationErrors = (req, res, next) => {
-  const validationErrors = validationResult(req);
-  // TODO: Generate error object and invoke next middleware function
-  if (!validationErrors.isEmpty()) {
-    const errors = validationErrors.array().map((error) => error.msg);
-
-    const err = Error("Bad request.");
-    err.errors = errors;
-    err.status = 400;
-    err.title = "Bad request.";
-    return next(err);
-  }
-  next();
-};
 
 const tweetNotFoundError = tweetId => {
   const err = new Error(`Tweet ${tweetId} not found`);
